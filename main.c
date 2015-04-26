@@ -37,7 +37,6 @@ static void usage(char *argv0)
 	fprintf(stderr, "%s:\n"
 		"add <name>\n"
 		"del <name>\n"
-		"list <name> \n"
 		"exec <name> cmd [args]\n", argv0);
 }
 
@@ -130,7 +129,6 @@ enum ns_op {
 	NS_OP_UNKNOWN = 0,
 	NS_OP_ADD,
 	NS_OP_DEL,
-	NS_OP_LIST,
 	NS_OP_EXEC,
 };
 
@@ -142,7 +140,6 @@ static enum ns_op getop(const char *cmd)
 	} cmds[] = {
 		{ .cmd = "add", .op = NS_OP_ADD },
 		{ .cmd = "del", .op = NS_OP_DEL },
-		{ .cmd = "list", .op = NS_OP_LIST },
 		{ .cmd = "exec", .op = NS_OP_EXEC },
 		{ .cmd = 0, .op = NS_OP_UNKNOWN },
 	};
@@ -155,7 +152,6 @@ static enum ns_op getop(const char *cmd)
 
 	return NS_OP_UNKNOWN;
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -173,10 +169,6 @@ int main(int argc, char *argv[])
 	case NS_OP_DEL:
 		ret = del(nspath);
 		break;
-	case NS_OP_LIST:
-		fprintf(stderr, "unimplemented\n");
-		usage(argv[0]);
-		return 1;
 	case NS_OP_EXEC:
 		if (argc < 4) {
 			fprintf(stderr, "exec is missing command\n");
