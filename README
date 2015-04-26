@@ -1,0 +1,3 @@
+netns: simple demo of linux network namespaces.
+
+Don't use this. use ip netns from iproute2.
