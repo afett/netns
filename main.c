@@ -41,7 +41,7 @@ static void usage(char *argv0)
 		"exec <name> cmd [args]\n", argv0);
 }
 
-static int add(const char *name)
+static int add(const char *path)
 {
 	if (unshare(CLONE_NEWNET) != 0) {
 		fprintf(stderr, "can't create new namespace: %s\n",
@@ -49,15 +49,15 @@ static int add(const char *name)
 		return -1;
 	}
 
-	int fd = open(name, O_RDONLY|O_CREAT|O_EXCL);
+	int fd = open(path, O_RDONLY|O_CREAT|O_EXCL);
 	if (fd < 0) {
 		fprintf(stderr, "can't create %s: %s\n",
-			name, strerror(errno));
+			path, strerror(errno));
 		return -1;
 	}
 	close(fd);
 
-	int ret = mount("/proc/self/ns/net", name, 0, MS_BIND, 0);
+	int ret = mount("/proc/self/ns/net", path, 0, MS_BIND, 0);
 	if (ret != 0) {
 		fprintf(stderr, "can't mount namespace: %s\n",
 			strerror(errno));
@@ -67,35 +67,35 @@ static int add(const char *name)
 	return 0;
 }
 
-static int del(const char *name)
+static int del(const char *path)
 {
-	if (umount(name) != 0) {
+	if (umount(path) != 0) {
 		fprintf(stderr, "can't umount namespace '%s': %s\n",
-			name, strerror(errno));
+			path, strerror(errno));
 		return -1;
 	}
 
-	if (unlink(name) != 0) {
+	if (unlink(path) != 0) {
 		fprintf(stderr, "can't unlink %s: %s\n",
-			name, strerror(errno));
+			path, strerror(errno));
 		return -1;
 	}
 
 	return 0;
 }
 
-static int exec(const char *name, char *argv[])
+static int exec(const char *path, char *argv[])
 {
-	int fd = open(name, O_RDONLY|O_CLOEXEC);
+	int fd = open(path, O_RDONLY|O_CLOEXEC);
 	if (fd < 0) {
-		fprintf(stderr, "can't open namesapce %s: %s\n",
-			name, strerror(errno));
+		fprintf(stderr, "can't open namespace %s: %s\n",
+			path, strerror(errno));
 		return -1;
 	}
 
 	if (setns(fd, CLONE_NEWNET) != 0) {
 		fprintf(stderr, "can't enter namespace %s: %s\n",
-			name, strerror(errno));
+			path, strerror(errno));
 		close(fd);
 		return -1;
 	}
