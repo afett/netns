@@ -1,3 +1,22 @@
 netns: simple demo of linux network namespaces.
 
 Don't use this. use ip netns from iproute2.
+
+Example:
+
+af@loki:~/files/c/netns$ sudo ./netns add foo
+
+af@loki:~/files/c/netns$ ls -la foo
+-r--r--r-- 1 root root 0 Apr 26 21:53 foo
+
+af@loki:~/files/c/netns$ mount | grep foo
+proc on /export/home/af/files/c/netns/foo type proc (rw,nosuid,nodev,noexec,relatime)
+
+af@loki:~/files/c/netns$ sudo ./netns exec foo ip l
+1: lo: <LOOPBACK> mtu 65536 qdisc noop state DOWN mode DEFAULT group default
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+
+af@loki:~/files/c/netns$ sudo ./netns del foo
+
+af@loki:~/files/c/netns$ ls -la foo
+ls: cannot access foo: No such file or directory
