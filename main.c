@@ -126,6 +126,37 @@ static int exec(const char *path, char *argv[])
 	return 0;
 }
 
+enum ns_op {
+	NS_OP_UNKNOWN = 0,
+	NS_OP_ADD,
+	NS_OP_DEL,
+	NS_OP_LIST,
+	NS_OP_EXEC,
+};
+
+static enum ns_op getop(const char *cmd)
+{
+	struct {
+		const char *cmd;
+		int op;
+	} cmds[] = {
+		{ .cmd = "add", .op = NS_OP_ADD },
+		{ .cmd = "del", .op = NS_OP_DEL },
+		{ .cmd = "list", .op = NS_OP_LIST },
+		{ .cmd = "exec", .op = NS_OP_EXEC },
+		{ .cmd = 0, .op = NS_OP_UNKNOWN },
+	};
+
+	for (size_t i = 0; cmds[i].cmd; ++i) {
+		if (strcmp(cmd, cmds[i].cmd) == 0) {
+			return cmds[i].op;
+		}
+	}
+
+	return NS_OP_UNKNOWN;
+}
+
+
 int main(int argc, char *argv[])
 {
 	if (argc < 3) {
@@ -133,27 +164,32 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (strcmp(argv[1], "add") == 0) {
-		return add(argv[2]) == 0 ? 0 : 1;
-	} else if (strcmp(argv[1], "del") == 0) {
-		return del(argv[2]) == 0 ? 0 : 1;
-	} else if (strcmp(argv[1], "list") == 0) {
+	int ret = 0;
+	const char *nspath = argv[2];
+	switch (getop(argv[1])) {
+	case NS_OP_ADD:
+		ret = add(nspath);
+		break;
+	case NS_OP_DEL:
+		ret = del(nspath);
+		break;
+	case NS_OP_LIST:
 		fprintf(stderr, "unimplemented\n");
 		usage(argv[0]);
 		return 1;
-	} else if (strcmp(argv[1], "exec") == 0) {
+	case NS_OP_EXEC:
 		if (argc < 4) {
 			fprintf(stderr, "exec is missing command\n");
 			usage(argv[0]);
 			return 1;
 		}
-
-		return exec(argv[2], &argv[3]);
-	} else {
+		ret = exec(nspath, &argv[3]);
+		break;
+	case NS_OP_UNKNOWN:
 		fprintf(stderr, "unknown command '%s'\n", argv[1]);
 		usage(argv[0]);
 		return 1;
 	}
 
-	return 0;
+	return ret == 0 ? 0 : 1;
 }
