@@ -49,7 +49,7 @@ static int add(const char *name)
 		return -1;
 	}
 
-	int fd = open(name, O_RDONLY|O_CREAT|O_EXCL, 0022);
+	int fd = open(name, O_RDONLY|O_CREAT|O_EXCL);
 	if (fd < 0) {
 		fprintf(stderr, "can't create %s: %s\n",
 			name, strerror(errno));
@@ -86,7 +86,7 @@ static int del(const char *name)
 
 static int exec(const char *name, char *argv[])
 {
-	int fd = open(name, O_RDONLY, 0022);
+	int fd = open(name, O_RDONLY|O_CLOEXEC);
 	if (fd < 0) {
 		fprintf(stderr, "can't open namesapce %s: %s\n",
 			name, strerror(errno));
