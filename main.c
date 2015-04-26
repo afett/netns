@@ -41,6 +41,12 @@ static void usage(char *argv0)
 		"exec <name> cmd [args]\n", argv0);
 }
 
+/* add a namespace
+     - leave the current network namespace
+     - create a new regular file
+     - bind mount out new namespace to the file
+*/
+
 static int add(const char *path)
 {
 	if (unshare(CLONE_NEWNET) != 0) {
@@ -67,6 +73,11 @@ static int add(const char *path)
 	return 0;
 }
 
+/* delete a namespace
+     - umount the namespace
+     - unlink the file
+*/
+
 static int del(const char *path)
 {
 	if (umount(path) != 0) {
@@ -83,6 +94,12 @@ static int del(const char *path)
 
 	return 0;
 }
+
+/* exec a program in the given namespace
+     - open the namespace
+     - associate with the namesapce fd
+     - pass command line args to exec
+*/
 
 static int exec(const char *path, char *argv[])
 {
