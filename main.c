@@ -32,12 +32,30 @@
 #include <unistd.h>
 #include <sys/mount.h>
 
+enum ns_op {
+	NS_OP_UNKNOWN = 0,
+	NS_OP_ADD,
+	NS_OP_DEL,
+	NS_OP_EXEC,
+};
+
+static struct {
+	const char *cmd;
+	const char *usage;
+	int op;
+} cmds[] = {
+	{ .cmd = "add", .op = NS_OP_ADD, .usage = "<name>" },
+	{ .cmd = "del", .op = NS_OP_DEL, .usage = "<name>" },
+	{ .cmd = "exec", .op = NS_OP_EXEC, .usage = "<name> cmd [args]" },
+	{ 0 },
+};
+
 static void usage(char *argv0)
 {
-	fprintf(stderr, "%s:\n"
-		"add <name>\n"
-		"del <name>\n"
-		"exec <name> cmd [args]\n", argv0);
+	fprintf(stderr, "usage: %s command\ncommands:\n", argv0);
+	for (size_t i = 0; cmds[i].cmd; ++i) {
+		fprintf(stderr, "\t%s %s\n", cmds[i].cmd, cmds[i].usage);
+	}
 }
 
 /* add a namespace
@@ -125,25 +143,8 @@ static int exec(const char *path, char *argv[])
 	return 0;
 }
 
-enum ns_op {
-	NS_OP_UNKNOWN = 0,
-	NS_OP_ADD,
-	NS_OP_DEL,
-	NS_OP_EXEC,
-};
-
 static enum ns_op getop(const char *cmd)
 {
-	struct {
-		const char *cmd;
-		int op;
-	} cmds[] = {
-		{ .cmd = "add", .op = NS_OP_ADD },
-		{ .cmd = "del", .op = NS_OP_DEL },
-		{ .cmd = "exec", .op = NS_OP_EXEC },
-		{ .cmd = 0, .op = NS_OP_UNKNOWN },
-	};
-
 	for (size_t i = 0; cmds[i].cmd; ++i) {
 		if (strcmp(cmd, cmds[i].cmd) == 0) {
 			return cmds[i].op;
